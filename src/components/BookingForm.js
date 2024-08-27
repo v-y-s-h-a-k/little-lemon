@@ -6,15 +6,27 @@ const BookingForm = (props) => {
   const [guests, setGuests] = useState("");
   const [occasion, setOccasion] = useState("");
 
+  const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+
   const handleSubmit = (e) => {
     e.preventDefault();
     props.submitForm(e);
   };
 
-  const handleChange = (e) => {
-    setDate(e);
-    props.dispatch(e);
+  const handleDateChange = (e) => {
+    const selectedDate = e.target.value;
+    setDate(selectedDate);
+    props.dispatch(selectedDate);
+    setTimes("");
   };
+
+  const filteredTimes = props.availableTimes.availableTimes.filter((availableTime) => {
+    if (date === today) {
+      const currentTime = new Date().toISOString().split("T")[1].substring(0, 5);
+      return availableTime > currentTime;
+    }
+    return true;
+  });
 
   return (
     <header>
@@ -26,8 +38,9 @@ const BookingForm = (props) => {
               <input
                 id="book-date"
                 value={date}
-                onChange={(e) => handleChange(e.target.value)}
+                onChange={handleDateChange}
                 type="date"
+                min={today}
                 required
               />
             </div>
@@ -41,9 +54,9 @@ const BookingForm = (props) => {
                 required
               >
                 <option value="">Select a Time</option>
-                {props.availableTimes.availableTimes.map((availableTimes) => {
-                  return <option key={availableTimes}>{availableTimes}</option>;
-                })}
+                {filteredTimes.map((availableTime) => (
+                  <option key={availableTime}>{availableTime}</option>
+                ))}
               </select>
             </div>
 
